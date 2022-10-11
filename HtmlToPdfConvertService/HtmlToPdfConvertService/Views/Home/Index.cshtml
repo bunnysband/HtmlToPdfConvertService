@@ -1,0 +1,17 @@
+﻿@{
+    ViewBag.Title = "Convert HTML to PDF";
+}
+
+<h2>Choose html file for convert</h2>
+<form action="~/Home/Convert" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept="text/html" />
+    <button type="submit">Convert</button>
+    <div class="loading">
+        Convert is in progress...
+    </div>
+</form>
+@if (ViewBag.Guid != Guid.Empty)
+{
+    <input type="button" title="Download" value="Download" onclick="location.href='@Url.Action("Download", "Home", new { id = ViewBag.Guid })'" />
+}
+

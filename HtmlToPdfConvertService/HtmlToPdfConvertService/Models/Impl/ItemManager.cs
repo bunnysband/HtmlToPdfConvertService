@@ -35,9 +35,9 @@ namespace HtmlToPdfConvertService.Models.Impl
             itemsRepository.AddItem(item);
         }
 
-        public async Task ConvertFileAsync(Guid identity, string uploadedFilePath)
+        public string ConvertFile(Guid identity, string uploadedFilePath)
         {
-            await ConvertFileAsyncInternal(identity, uploadedFilePath);
+            return ConvertFileInternal(identity, uploadedFilePath);
         }
 
         public ItemInfo? GetItem(Guid id)
@@ -64,7 +64,7 @@ namespace HtmlToPdfConvertService.Models.Impl
             return File.ReadAllText(filePath);
         }
 
-        private async Task ConvertFileAsyncInternal(Guid identity, string fileToConvertPath)
+        private string ConvertFileInternal(Guid identity, string fileToConvertPath)
         {
             var item = itemsRepository.GetItem(identity);
             if(item == null)
@@ -75,12 +75,13 @@ namespace HtmlToPdfConvertService.Models.Impl
             item.HtmlContent = fileContentToConvert;
             itemsRepository.UpdateItem(item);
             var newFilePath = GetNewFilePath(fileToConvertPath);
-            await fileCoverter.ConvertAsync(item.HtmlContent, newFilePath)
+            return fileCoverter.ConvertAsync(item.HtmlContent, newFilePath)
                 .ContinueWith(task =>
                 {  
                     item.PdfFilePath = newFilePath;
                     itemsRepository.UpdateItem(item);
-                });
+                    return item.PdfFilePath;
+                }).Result;
         }
 
         private string GetNewFilePath(string oldFilePath)

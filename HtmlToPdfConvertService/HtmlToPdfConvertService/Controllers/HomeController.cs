@@ -26,7 +26,7 @@ namespace HtmlToPdfConvertService.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Convert()
+        public IActionResult Convert()
         {
             var request = ControllerContext.HttpContext.Request;
             IFormFile fileToUpload = request.Form.Files.SingleOrDefault();
@@ -37,9 +37,9 @@ namespace HtmlToPdfConvertService.Controllers
             var identity = Guid.NewGuid();
             var filePath = Path.Combine(uploadFolderPath, $"{identity}_{fileToUpload.FileName}");
 
-            await UploadFile(fileToUpload, filePath)
+            var convertedPath = UploadFile(fileToUpload, filePath)
                 .ContinueWith(task => itemManager.CreateNewItem(identity, fileToUpload.FileName))
-                .ContinueWith(task => itemManager.ConvertFileAsync(identity, filePath));
+                .ContinueWith(task => itemManager.ConvertFile(identity, filePath)).Result;
             ViewBag.Guid = identity;
             return View("Index");
         }
